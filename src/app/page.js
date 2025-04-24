@@ -1,95 +1,57 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
+import React, { useState } from 'react';
+import { collection, addDoc, Timestamp } from "firebase/firestore"; 
+import { db } from "./firebase-config";
+import Image from 'next/image';
+import ConfettiPop from './components/ConfettiPop';
 
-export default function Home() {
+export default function Page1() {
+  const [name, setName] = useState("");
+  const [triggerConfetti, setTriggerConfetti] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+
+    const currentTime = Timestamp.now();
+
+    try {
+      await addDoc(collection(db, 'Buzzers'), {
+        name: name.trim(),
+        time: currentTime
+      });
+      setTriggerConfetti(true);
+      setTimeout(() => setTriggerConfetti(false), 300); // Reset trigger
+    } catch (error) {
+      console.error("Error adding document: ", error);
+    }
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <div className="min-h-screen bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex flex-col justify-center items-center text-white font-sans px-4">
+      <ConfettiPop trigger={triggerConfetti} />
+      <h1 className="text-5xl font-black mb-10 text-center text-purple-900"> Buzz In Fast! </h1>
+      
+      <div className="shadow-2xl rounded-3xl bg-white bg-opacity-10 p-10 backdrop-blur-md flex flex-col items-center space-y-6 border-2 border-white border-opacity-30">
+        <input
+          type="text"
+          placeholder="Enter your name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="p-4 w-72 rounded-xl text-black text-lg font-semibold focus:outline-none focus:ring-4 focus:ring-white shadow-inner"
         />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <button onClick={handleSubmit} className="focus:outline-none transform hover:scale-105 active:scale-95 transition-transform duration-300">
           <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+            src="/buzzer.png" 
+            alt="Buzzer Button"
+            width={400}
+            height={400}
+            
           />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        </button>
+        <p className="text-sm text-white italic">Click the buzzer to lock in your time!</p>
+      </div>
     </div>
   );
 }
